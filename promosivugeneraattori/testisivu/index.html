@@ -1,0 +1,243 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+
+  <!--
+  <meta name="description" content="A simple HTML5 Template for new projects.">
+  <meta name="author" content="SitePoint">
+
+  <meta property="og:title" content="A Basic HTML5 Template">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.sitepoint.com/a-basic-html5-template/">
+  <meta property="og:description" content="A simple HTML5 Template for new projects.">
+  <meta property="og:image" content="image.png">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="css/styles.css?v=1.0">
+  -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
+  
+  <style>
+    #background {
+        background-color: white;
+        /*
+        object-fit: cover;
+        height: 100vh;
+        width: 100vw;
+        margin: auto;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        filter: blur(7px);
+        z-index: -1;
+        */
+        }
+
+    .outer-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        }
+
+    .player-container {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        height: 400px;
+        width: 325px;
+        margin: auto;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        box-shadow: 0 0 30px #f94c57;
+        }
+
+    #thumbnail {
+        position: absolute;
+        object-fit: fill;
+        height: 100%;
+        width: 100%;
+        top: -10%;
+        transition: 1s;
+        z-index: 3;
+        }
+
+    .box {
+        position: absolute;
+        height: 45%;
+        width: 100%;
+        background: linear-gradient(90deg, rgb(145, 145, 145), rgb(220, 220, 220));
+        z-index: 4;
+        bottom: -10%;
+        display: grid;
+        grid-template-columns: 35px 255px 35px;
+        grid-template-rows: 85px 25px 25px;
+        grid-template-areas:
+            "one two two three"
+            "four four four four"
+            "five five five five";
+        column-gap: 10px;
+        }
+
+    .play-pause {
+        z-index: 2;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        }
+    .fa-pause-circle {
+        filter: invert(1);
+        cursor: pointer;
+        display: block;
+        }
+
+    #play,
+    #pause,
+    #prev-track,
+    #next-track {
+        z-index: 2;
+        width: 50px;
+        height: 50px;
+        filter: invert(1);
+        cursor: pointer;
+        display: block;
+        }
+
+    .track-info {
+        grid-area: two;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding-left: 5%;
+        padding-right: 5%;
+        /*border: 1px solid red;*/ 
+        }
+
+    #track-artist {
+        color: #f94c57;
+        font-family: "Lato", sans-serif;
+        padding-right: 5px;
+        font-weight: bold;
+        font-size: 1.125rem;
+        text-shadow: 0 0 15px white;
+        }
+
+    #track-title {
+        color: white;
+        font-family: "Lato", sans-serif;
+        font-size: 1rem;
+        }
+
+    .next-prev {
+        grid-area: three;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        /* border: 1px solid red; */
+        }
+
+    .progress-bar {
+        grid-area: four;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* border: 1px solid red; */
+        }
+
+    #progressBar {
+        appearance: none;
+        height: 5px;
+        background: white;
+        width: 57.5%;
+        outline: none;
+        border-radius: 30px;
+        }
+
+    #progressBar::-webkit-slider-thumb {
+        appearance: none;
+        height: 11px;
+        width: 11px;
+        outline: none;
+        background: #f94c57;
+        border-radius: 30px;
+        cursor: pointer;
+        }
+
+    .track-time {
+        grid-area: five;
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        /* border: 1px solid red; */
+        }
+
+    #currentTime {
+        font-family: "Lato", sans-serif;
+        font-size: 1rem;
+        color: white;
+        }
+
+    #durationTime {
+        font-family: "Lato", sans-serif;
+        font-size: 1rem;
+        color: #f94c57;
+        text-shadow: 0 0 15px white;
+        }
+  </style>
+</head>
+
+<body>
+
+<script src="player.js"></script>
+
+<div class="outer-container">
+    <!--img src="kalsarit jäässä kansi.jpg" alt="..." id="background" /-->
+    <audio src="parkanon_tulikukko-kalsarit_jaassa_feat_sonja_saa.mp3" id="track"></audio>
+  </div>
+  
+  <div class="player-container">
+    <img src="kalsarit jäässä kansi.jpg" alt="Harry Styles' Fine Line album cover" id="thumbnail" />
+  
+    <div class="box">
+      <div class="play-pause">
+        <i id="play" class="fa fa-play-circle fa-3x"></i>
+        <i id="pause" class="fa fa-pause-circle fa-3x"></i>
+      </div>
+      <div class="track-info">
+        <div id="track-artist">Parkanon Tulikukko feat. Sonja Sää</div>
+        <div id="track-title">Kalsarit jäässä</div>
+      </div>
+      <div class="next-prev">
+        <i class="fa fa-arrow-alt-circle-left fa-2x" id="prev-track"></i>
+        <i class="fa fa-arrow-alt-circle-right fa-2x" id="next-track"></i>
+      </div>
+      <div class="progress-bar">
+        <input type="range" id="progressBar" min="0" max="" value="0" />
+      </div>
+      <div class="track-time">
+        <div id="currentTime"></div>
+        <div id="durationTime"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
