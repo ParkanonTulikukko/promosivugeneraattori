@@ -1,6 +1,7 @@
 import './App.css'
 import uploadVideo from './youTube/youTubeUploadClient'
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { Navigate } from 'react-router-dom';
@@ -34,40 +35,71 @@ const jsKoodi = `
 function Lomake() {
 
   const [kappaleenNimi, setKappaleenNimi] = useState("Biisikappale")
-  const [kappale, setKappale] = useState(null);
-  const [apiKey, setApiKey] = useState(null);
-  const [videotiedosto, setVideotiedosto] = useState(null);
-  const [videonOtsikko, setVideonOtsikko] = useState('otsikko hieno');
-  const [videonKuvaus, setVideonKuvaus] = useState('hyvä video');
+  const [kappale, setKappale] = useState(null)
+  const [videotiedosto, setVideotiedosto] = useState(null)
+  const [videonOtsikko, setVideonOtsikko] = useState('otsikko hieno')
+  const [videonKuvaus, setVideonKuvaus] = useState('hyvä video')
+  const [apiKey, setApiKey] = useState(null)
 
   useEffect(() => {
     // Check if the access token is present in local storage
     const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) {
-      // If the access token is not present, navigate to the authorization page
-      return <Navigate to="/" />
+    console.log("accessToken useffectossä: " + accessToken)
+    //console.log("!accestoken on " + !accessToken)    
+    if (accessToken === undefined || accessToken === null) {
+      console.log("mentiin accessToken === undefined || accessToken === null)")
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if(!code) {
+        return <Navigate to="/" />
+        }
+      requestAccessToken()
       }
-    /*
-    axios.get('http://localhost:4000/api/config')
-    .then(response => {
-      // Use the API key to make requests to the YouTube API
-      //console.log("tässä on api key: " + response.data["API_KEY"])
-      setApiKey(response.data["API_KEY"])
-    })
-    .catch(error => {
-      console.log(error);
-    });
-    */
   }, []);
 
-  //let doc = new DOMParser().parseFromString("<html></html>", "text/html");
+  const requestAccessToken = async () => {
+    // Fetch the ApiKey, ClientId and ClientSecret from the backend
+    const { data } = await axios.post('http://localhost:4000/api/config');
+    const { API_KEY } = data;
+    setApiKey(API_KEY)
+    // Get the authorization code from the query parameters of the URL
+    const authorizationCode = new URLSearchParams(window.location.search).get('code');
+  
+    axios.post('http://localhost:4000/getAccessToken', { authorizationCode: authorizationCode }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(res => {
+      const { data } = res;
+      const { accessToken } = data;
+      localStorage.setItem('access_token', accessToken);
+    });
+  }
+
   let doc
 
   const lataaKappale = (e) => {
     setKappale(e.target.files[0])
     }
 
-  function luoSivu() {
+  async function luoSivuTmp(e) {
+    e.preventDefault()
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      const response = await axios.post('http://localhost:4000/getStatistics', { accessToken });
+      console.log(response);
+      const channel = response;
+      const statistics = channel.data;
+      alert("View count: " + statistics.viewCount + "\nComment count: " +  statistics.commentCount + "\nSubscriber count: " + statistics.subscriberCount);
+    } catch (error) {
+      console.error(error);
+    }
+    }
+
+  function luoSivu(e) {
+
+    //alert("nimi, tyyppi ja koko: " + videotiedosto.name + " " + videotiedosto.type + " " + videotiedosto.size)
 
     uploadVideo(videotiedosto, videonOtsikko, videonKuvaus, apiKey);
 
@@ -111,7 +143,8 @@ function Lomake() {
     // Create the document
     doc = parser.parseFromString(html.outerHTML, "text/html");
 
-    lataaZip()
+    //lataaZip()
+    e.preventDefault();
     }
 
   function lataaZip() {
@@ -188,11 +221,9 @@ function Lomake() {
         <textarea value={videonKuvaus} onChange={e => setVideonKuvaus(e.target.value)} />
       </label>
       <br />
-      <form onSubmit={luoSivu}>
+      <form onSubmit={luoSivuTmp}>
         <input type="submit" value="Lähetä" /> 
       </form>
-
-      
     </div>
   );
 }
