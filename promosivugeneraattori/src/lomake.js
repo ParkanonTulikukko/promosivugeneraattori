@@ -84,7 +84,7 @@ function Lomake() {
     }
 
   async function luoSivuTmp(e) {
-    e.preventDefault()
+    
     try {
       const accessToken = localStorage.getItem('access_token');
       const response = await axios.post('http://localhost:4000/getStatistics', { accessToken });
@@ -94,15 +94,41 @@ function Lomake() {
       alert("View count: " + statistics.viewCount + "\nComment count: " +  statistics.commentCount + "\nSubscriber count: " + statistics.subscriberCount);
     } catch (error) {
       console.error(error);
-    }
+      }
     }
 
-  function luoSivu(e) {
-
+  async function luoSivu(e) {
     //alert("nimi, tyyppi ja koko: " + videotiedosto.name + " " + videotiedosto.type + " " + videotiedosto.size)
+    e.preventDefault()
 
-    uploadVideo(videotiedosto, videonOtsikko, videonKuvaus, apiKey);
+    console.log("videon type frontissa: " + videotiedosto.type)
+    
+    const accessToken = localStorage.getItem('access_token');
+    console.log("accestokeni frontissa: " + accessToken)
 
+    const formData = new FormData();
+    formData.append('title', videonOtsikko);
+    formData.append('description', videonKuvaus);
+    //formData.append('tags', ['tag1', 'tag2', 'tag3']);
+    formData.append('categoryId', 22);
+    formData.append('privacyStatus', 'private');
+    formData.append('videotiedosto', videotiedosto);
+    formData.append('accessToken', accessToken)
+    
+    axios.post('http://localhost:4000/uploadVideo', formData,
+      {headers: {
+        "Content-Type": "multipart/form-data",
+        },
+    }).then(response => {
+      console.log(response.data);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+    //uploadVideo(videotiedosto, videonOtsikko, videonKuvaus, apiKey);
+
+    /*
     const parser = new DOMParser();
     // Create the audio element
     const audioPlayer = document.createElement("audio");
@@ -142,7 +168,7 @@ function Lomake() {
 
     // Create the document
     doc = parser.parseFromString(html.outerHTML, "text/html");
-
+*/
     //lataaZip()
     e.preventDefault();
     }
@@ -221,9 +247,10 @@ function Lomake() {
         <textarea value={videonKuvaus} onChange={e => setVideonKuvaus(e.target.value)} />
       </label>
       <br />
-      <form onSubmit={luoSivuTmp}>
+      <form onSubmit={luoSivu}>
         <input type="submit" value="Lähetä" /> 
       </form>
+      <button onClick={luoSivuTmp}>Testaa</button>
     </div>
   );
 }
