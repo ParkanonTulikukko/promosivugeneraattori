@@ -25,7 +25,6 @@ const Autorisointi = () => {
     }
   };
   
-
   const handleAuthClick = async (e) => {
     e.preventDefault()
     // Remove existing access token from local storage
@@ -36,13 +35,12 @@ const Autorisointi = () => {
     const scope = "https://www.googleapis.com/auth/youtube";  
 
    getClientId(async (updatedClientId) => {
-      console.log("cielntid handleauthclikissä: " + updatedClientId)
+      console.log("clientid handleauthclikissä: " + updatedClientId)
       const authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${updatedClientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
       window.location.replace(authUrl);
       })
     }
     
-
   return (
     <div className='App'>
       <h1>Promosivugeneraattori</h1>

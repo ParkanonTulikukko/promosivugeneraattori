@@ -23,199 +23,75 @@
   <link rel="stylesheet" href="css/styles.css?v=1.0">
   -->
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous">
-  
   <style>
-    #background {
-        background-color: white;
-        /*
-        object-fit: cover;
-        height: 100vh;
-        width: 100vw;
-        margin: auto;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        filter: blur(7px);
-        z-index: -1;
-        */
-        }
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+  
+  .bg-image {
+    /* The image used */
+    background-image: url("KUOROTYTTÖ_kannet_3000x3000.jpg");
+    
+    /* Add the blur effect */
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+    
+    /* Full height */
+    height: 100%; 
+    
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  
+  /* Position text in the middle of the page/image */
+  .bg-text {
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0, 0.4); /* Black w/opacity/see-through */
+    color: white;
+    font-weight: bold;
+    border: 3px solid #f1f1f1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    width: 80%;
+    padding: 20px;
+    text-align: center;
+  }
+  </style>   
 
-    .outer-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        }
-
-    .player-container {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        height: 400px;
-        width: 325px;
-        margin: auto;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 10px;
-        box-shadow: 0 0 30px #f94c57;
-        }
-
-    #thumbnail {
-        position: absolute;
-        object-fit: fill;
-        height: 100%;
-        width: 100%;
-        top: -10%;
-        transition: 1s;
-        z-index: 3;
-        }
-
-    .box {
-        position: absolute;
-        height: 45%;
-        width: 100%;
-        background: linear-gradient(90deg, rgb(145, 145, 145), rgb(220, 220, 220));
-        z-index: 4;
-        bottom: -10%;
-        display: grid;
-        grid-template-columns: 35px 255px 35px;
-        grid-template-rows: 85px 25px 25px;
-        grid-template-areas:
-            "one two two three"
-            "four four four four"
-            "five five five five";
-        column-gap: 10px;
-        }
-
-    .play-pause {
-        z-index: 2;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        }
-    .fa-pause-circle {
-        filter: invert(1);
-        cursor: pointer;
-        display: block;
-        }
-
-    #play,
-    #pause,
-    #prev-track,
-    #next-track {
-        z-index: 2;
-        width: 50px;
-        height: 50px;
-        filter: invert(1);
-        cursor: pointer;
-        display: block;
-        }
-
-    .track-info {
-        grid-area: two;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        padding-left: 5%;
-        padding-right: 5%;
-        /*border: 1px solid red;*/ 
-        }
-
-    #track-artist {
-        color: #f94c57;
-        font-family: "Lato", sans-serif;
-        padding-right: 5px;
-        font-weight: bold;
-        font-size: 1.125rem;
-        text-shadow: 0 0 15px white;
-        }
-
-    #track-title {
-        color: white;
-        font-family: "Lato", sans-serif;
-        font-size: 1rem;
-        }
-
-    .next-prev {
-        grid-area: three;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        /* border: 1px solid red; */
-        }
-
-    .progress-bar {
-        grid-area: four;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* border: 1px solid red; */
-        }
-
-    #progressBar {
-        appearance: none;
-        height: 5px;
-        background: white;
-        width: 57.5%;
-        outline: none;
-        border-radius: 30px;
-        }
-
-    #progressBar::-webkit-slider-thumb {
-        appearance: none;
-        height: 11px;
-        width: 11px;
-        outline: none;
-        background: #f94c57;
-        border-radius: 30px;
-        cursor: pointer;
-        }
-
-    .track-time {
-        grid-area: five;
-        display: flex;
-        justify-content: space-around;
-        align-items: flex-start;
-        /* border: 1px solid red; */
-        }
-
-    #currentTime {
-        font-family: "Lato", sans-serif;
-        font-size: 1rem;
-        color: white;
-        }
-
-    #durationTime {
-        font-family: "Lato", sans-serif;
-        font-size: 1rem;
-        color: #f94c57;
-        text-shadow: 0 0 15px white;
-        }
-  </style>
 </head>
 
 <body>
 
-<script src="player.js"></script>
+<!--script src="player.js"></script-->
+<div class="bg-image"></div>
+<div class="bg-text">
+  <!--img src="KUOROTYTTÖ_kannet_3000x3000.jpg" alt="..." id="background"/-->
+  <h1>biisikappale ulos sillo ja sillo</h1>
+  <h1>Promoteksti: ihan siku hyvä jauuuuuuuuu</h1>
+  <h1>Download MP3: Biisikappale.mp3</h1>
+  <h1>Download WAV: Biisikappale.wav</h1>
+</div>  
 
-<div class="outer-container">
-    <!--img src="kalsarit jäässä kansi.jpg" alt="..." id="background" /-->
+<!--div class="outer-container">
+
+
+    </div>
     <audio src="parkanon_tulikukko-kalsarit_jaassa_feat_sonja_saa.mp3" id="track"></audio>
-  </div>
+  </div-->
   
-  <div class="player-container">
-    <img src="kalsarit jäässä kansi.jpg" alt="Harry Styles' Fine Line album cover" id="thumbnail" />
+  <!--div class="player-container">
+    <img src="KUOROTYTTÖ_kannet_3000x3000.jpg" alt="Harry Styles' Fine Line album cover" id="thumbnail" />
   
     <div class="box">
       <div class="play-pause">
@@ -238,6 +114,8 @@
         <div id="durationTime"></div>
       </div>
     </div>
-  </div>
+  </div-->
+  
+
 </body>
 </html>

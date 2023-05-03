@@ -5,41 +5,136 @@ import axios from 'axios'
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { Navigate } from 'react-router-dom';
+import { createHtmlPage } from './generatedWebPage';
 
 const cssKoodi = `
-  #playButton {
-    background-color: green;
+#container {
+  padding-top: 100px;
+  position: relative;
+  text-align: center;
+  flex-wrap: wrap;
+  flex-direction: column;
+  width: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+  }
+
+#container > * {
+  margin: 10px;
+  }
+  
+
+#otsikko {
+  font-size: 3.0em;
+  }  
+
+#album-cover {
+  background-color: rgb(19, 19, 172);
+  width: 400px;
+  position: relative;
+  height: 400px;
+  }
+
+#lataukset {
+  margin-left: 10px;
+  text-align: center;
+  font-size: 2.0em;
+  }
+ 
+#promoteksti {
+  margin-top: 10px;
+  font-size: 2.0em;
+  }
+
+  #album-cover img {
+    max-width: 400px;
+    max-height: 400px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto; /* added */
+    }
+  
+  button i {
     color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
+    font-size: 2em;
+  }
+
+#play-pause {
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 3px solid white;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     cursor: pointer;
-  }`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+  }
+
+input[type="range"] {
+    display: none;
+}
+
+.video_container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding-bottom: 56.25%;
+  }
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  }
+`;
 
 const jsKoodi = `
-  function playPause() {
-      let audioPlayer = document.getElementById("audioPlayer");
-      let playButton = document.getElementById("playButton");
-      if (audioPlayer.paused) {
-          audioPlayer.play();
-          playButton.innerHTML = "Pause";
+  window.addEventListener('load', function() {
+
+    const player = document.querySelector("#player");
+    const playPauseButton = document.querySelector("#play-pause");
+    
+    playPauseButton.addEventListener("click", function() {
+      if (playPauseButton.textContent === "▶") {
+        player.play();
+        playPauseButton.textContent = "❚❚"
       } else {
-          audioPlayer.pause();
-          playButton.innerHTML = "Play";
+        player.pause();
+        playPauseButton.textContent = "▶"
       }
-  }`
+    });
+    
+    })`
 
 function Lomake() {
 
+  const [esittaja, setEsittaja] = useState("Kissi")
   const [kappaleenNimi, setKappaleenNimi] = useState("Biisikappale")
   const [kappale, setKappale] = useState(null)
   const [videotiedosto, setVideotiedosto] = useState(null)
   const [videonOtsikko, setVideonOtsikko] = useState('otsikko hieno')
   const [videonKuvaus, setVideonKuvaus] = useState('hyvä video')
+  const [promoteksti, setPromoteksti] = useState("Erittäin hyvä kappale - tee juttu ja ota soittolistalle!");
+  const [wavTiedosto, setWavTiedosto] = useState(null);
+  const [mp3Tiedosto, setMp3Tiedosto] = useState(null);
+  const [levynkansitiedosto, setLevynkansitiedosto] = useState(null)
+  const [otsikko, setOtsikko] = useState("");
   const [apiKey, setApiKey] = useState(null)
+  let videoId = null;
 
   useEffect(() => {
     // Check if the access token is present in local storage
@@ -83,7 +178,7 @@ function Lomake() {
     setKappale(e.target.files[0])
     }
 
-  async function luoSivuTmp(e) {
+  async function testaa(e) {
     
     try {
       const accessToken = localStorage.getItem('access_token');
@@ -100,9 +195,11 @@ function Lomake() {
   async function luoSivu(e) {
     //alert("nimi, tyyppi ja koko: " + videotiedosto.name + " " + videotiedosto.type + " " + videotiedosto.size)
     e.preventDefault()
+    //lahetaVideo()
+    lataaZip()
+    }
 
-    console.log("videon type frontissa: " + videotiedosto.type)
-    
+  async function lahetaVideo() {
     const accessToken = localStorage.getItem('access_token');
     console.log("accestokeni frontissa: " + accessToken)
 
@@ -114,73 +211,17 @@ function Lomake() {
     formData.append('privacyStatus', 'private');
     formData.append('videotiedosto', videotiedosto);
     formData.append('accessToken', accessToken)
-    
-    axios.post('http://localhost:4000/uploadVideo', formData,
-      {headers: {
-        "Content-Type": "multipart/form-data",
-        },
-    }).then(response => {
-      console.log(response.data);
-    })
-    .catch(error => {
-      console.error(error);
-    });
 
-    //uploadVideo(videotiedosto, videonOtsikko, videonKuvaus, apiKey);
+    }  
 
-    /*
-    const parser = new DOMParser();
-    // Create the audio element
-    const audioPlayer = document.createElement("audio");
-    audioPlayer.setAttribute("id", "audioPlayer");
-    audioPlayer.setAttribute("src", kappaleenNimi+".mp3");
-
-    // Create the play button element
-    const playButton = document.createElement("button");
-    playButton.setAttribute("id", "playButton");
-    playButton.setAttribute("onclick", "playPause()");
-    playButton.innerHTML = "Play";
-
-    // Create the link element
-    const link = document.createElement("link");
-    link.setAttribute("rel", "stylesheet");
-    link.setAttribute("type", "text/css");
-    link.setAttribute("href", "styles.css");
-
-    // Create the script element
-    const script = document.createElement("script");
-    script.setAttribute("src", "player.js");
-
-    // Create the head element
-    const head = document.createElement("head");
-    head.appendChild(link);
-    head.appendChild(script);
-
-    // Create the body element
-    const body = document.createElement("body");
-    body.appendChild(audioPlayer);
-    body.appendChild(playButton);
-
-    // Create the html element
-    const html = document.createElement("html");
-    html.appendChild(head);
-    html.appendChild(body);
-
-    // Create the document
-    doc = parser.parseFromString(html.outerHTML, "text/html");
-*/
-    //lataaZip()
-    e.preventDefault();
-    }
-
-  function lataaZip() {
+  async function lataaZip() {
 
     //luodaan zip-kansio
     const zip = new JSZip();
     const folder = zip.folder("promosivu");
 
     //html-sivu
-    let htmlSivu = doc.documentElement.outerHTML;
+    let htmlSivu = createHtmlPage(esittaja, kappaleenNimi, promoteksti).documentElement.outerHTML;
     const htmlBlob = new Blob([htmlSivu], { type: "text/html" });
     const url = URL.createObjectURL(htmlBlob);
 
@@ -193,65 +234,123 @@ function Lomake() {
     //luodaan CSS-tiedosto
     const cssBlob = new Blob([cssKoodi], { type: "text/css" })
 
+    //luodaan kuvatiedosto
+    const jpgBlob = new Blob([levynkansitiedosto], { type: "image/jpeg" }) 
+
+    //luodaan mp3-tiedosto
+    const mp3Blob = new Blob([mp3Tiedosto], { type: "audio/mp3" }) 
+
+    //luodaan wav-tiedosto
+    const wavBlob = new Blob([wavTiedosto], { type: "audio/wav" })
+
     //lisätään kansioon js- ja css-tiedostot
     folder.file("player.js", jsBlob)
-    folder.file("styles.css", cssBlob)
+    folder.file("style.css", cssBlob)
+    folder.file("levynkansi.jpg", jpgBlob)
+    folder.file(`${esittaja}-${kappaleenNimi}.mp3`, mp3Blob)
+    folder.file(`${esittaja}-${kappaleenNimi}.wav`, wavBlob)
 
-    const reader = new FileReader();
-    reader.onload = function() {
+    // generate URL object for the zipped content
+    const zipUrl = await folder.generateAsync({ type: "blob" }).then(blob => URL.createObjectURL(blob));
 
-      //reader.resultissa on jo kappale, tsekkaa rivi tämän funktion jälkeen,
-      //josta funktiota kutsutaan
-      const mp3Blob = new Blob([reader.result], { type: 'audio/mp3' });
+    // create a link element with the download attribute set to the filename
+    const link = document.createElement("a");
+    link.href = zipUrl;
+    link.download = "promosivu.zip";
 
-      //lisätään kansioon mp3:nen
+    // trigger a click event on the link element to start downloading
+    link.click();
+
+    /*
+    NÄÄ ON JOTAIN VANHAA, en muista mitä, ei toimi
+
+    function convertToBlob(file, fileType) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function() {
+          const blob = new Blob([reader.result], { type: fileType });
+          resolve(blob);
+        }
+        reader.readAsArrayBuffer(file);
+      });
+    }
+    
+    const mp3Promise = convertToBlob(kappale, 'audio/mp3');
+    const wavPromise = convertToBlob(wavTiedosto, 'audio/wav');
+    
+    Promise.all([mp3Promise, wavPromise]).then(([mp3Blob, wavBlob]) => {
       folder.file(kappaleenNimi + ".mp3", mp3Blob);
+      folder.file(kappaleenNimi + ".wav", wavBlob);
       zip.generateAsync({ type: "blob" }).then((content) => {
         saveAs(content, "promosivu.zip");
         URL.revokeObjectURL(url);
-        });
-      }
-    
-    //lisätään kappale  
-    reader.readAsArrayBuffer(kappale);
+      });
+    });
+    */
     }  
 
-  return (
-    <div className="App">
-      <label for="kappaleenNimi">Kappaleen nimi: </label>
-        <input
-          id="kappaleenNImi"
-          type="text"
-          value={kappaleenNimi}
-          onChange={(e) => {setKappaleenNimi(e.target.value)}}
-        />
-      <br />  
-      <label>
-        MP3-tiedosto:  
-        <input type="file" onChange={lataaKappale} />
-      </label>
-      <br />  
-      {kappale && <p>Selected file: {kappale.name}</p>}
-      <label>
-        Videotiedosto:
-        <input type="file" onChange={e => setVideotiedosto(e.target.files[0])} />
-      </label>
-      <br />
-      <label>
-        Videon osikko:
-        <input type="text" value={videonOtsikko} onChange={e => setVideonOtsikko(e.target.value)} />
-      </label>
-      <br />
-      <label>
-        Videon kuvaus:
-        <textarea value={videonKuvaus} onChange={e => setVideonKuvaus(e.target.value)} />
-      </label>
-      <br />
-      <form onSubmit={luoSivu}>
-        <input type="submit" value="Lähetä" /> 
-      </form>
-      <button onClick={luoSivuTmp}>Testaa</button>
-    </div>
+  return (  
+  <div className="App">
+    <label>
+      Esittäjä:
+      <input type="text" value={esittaja} onChange={(e) => setEsittaja(e.target.value)} />
+    </label>
+    <br />
+    <label for="kappaleenNimi">Kappaleen nimi: </label>
+    <input
+      id="kappaleenNimi"
+      type="text"
+      value={kappaleenNimi}
+      onChange={(e) => {setKappaleenNimi(e.target.value)}}
+    />
+    <br />
+    <label>
+      Otsikko:
+      <input type="text" value={otsikko} onChange={(e) => setOtsikko(e.target.value)} />
+    </label>
+    <br />
+    <label>
+      Promoteksti:
+      <textarea value={promoteksti} onChange={(e) => setPromoteksti(e.target.value)} />
+    </label>
+    <br />
+    <label>
+      Levynkansitiedosto:  
+      <input type="file" onChange={(e) => setLevynkansitiedosto(e.target.files[0])} />
+    </label>
+    <br />
+    <label>
+      MP3-tiedosto:  
+      <input type="file" onChange={(e) => setMp3Tiedosto(e.target.files[0])} />
+    </label>
+    <br />  
+    {kappale && <p>Selected file: {kappale.name}</p>}
+    <label>
+      WAV-tiedosto:  
+      <input type="file" onChange={(e) => setWavTiedosto(e.target.files[0])} />
+    </label>
+    <br />
+    <label>
+      Videotiedosto:
+      <input type="file" onChange={(e) => setVideotiedosto(e.target.files[0])} />
+    </label>
+    <br />
+    <label>
+      Videon otsikko:
+      <input type="text" value={videonOtsikko} onChange={(e) => setVideonOtsikko(e.target.value)} />
+    </label>
+    <br />
+    <label>
+      Videon kuvaus:
+      <textarea value={videonKuvaus} onChange={(e) => setVideonKuvaus(e.target.value)} />
+    </label>
+    <br />
+    <form onSubmit={luoSivu}>
+      <input type="submit" value="Lähetä" /> 
+    </form>
+    <button onClick={testaa}>Testaa</button>
+  </div>
+
   );
 }
 
